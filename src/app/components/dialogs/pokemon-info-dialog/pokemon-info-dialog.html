@@ -1,0 +1,32 @@
+<section>
+  <div class="flex justify-end items-center p-2">
+    <button
+      class="flex justify-center items-center hover:scale-110 transition-transform duration-500 text-red-600 rounded-4xl border-2 p-1"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="flex items-center justify-center">
+    <button class="py-2.5 px-6 mb-2 text-sm rounded-full border border-solid border-emerald-200 text-emerald-600 cursor-pointer font-semibold shadow-xs transition-all duration-500 hover:bg-emerald-600 hover:text-white" (click)="showEvolutionDetail()">{{showEvolution ? 'Ocultar Evolución': 'Ver Evolución'}}</button>
+  </div>
+  <div class="flex justify-center items-center gap-2">
+    @for (type of pokemon.types; track $index) {
+      <app-pokemon-type-button [typeSelected]="type.type" [isButton]="true" (seletectType)="showListPokemonByType($event)"></app-pokemon-type-button>
+    }
+  </div>
+  <div class="flex justify-center gap-5">
+    <app-pokemon-info [pokemon]="pokemon"></app-pokemon-info>
+    @if(showEvolution){
+      <app-pokemon-info [pokemon]="pokemonEvo"></app-pokemon-info>
+    }
+    @if(loadingEvolution){
+      <div class="flex items-center justify-center w-100">
+        <span class="loader"></span>
+      </div>
+    }
+    @if(noHaveEvolution){
+      <span class="mt-50 mr-5">No tiene evolucion, has llegado a su maxima evolucion</span>
+    }
+  </div>
+</section>

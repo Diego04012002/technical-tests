@@ -1,0 +1,19 @@
+<section class="flex justify-center py-5">
+  <nav class="flex flex-col gap-4 max-w-[1000px] m-0">
+    <ul class="flex items-center flex-wrap gap-2 mt-20">
+      @for (type of pokemonTypes; track $index) {
+      <li>
+        <app-pokemon-type-button
+          [typeSelected]="type"
+          [isSelected]="type==typeSelected"
+          (seletectType)="selectType($event)"
+          [isButton]="true"
+        ></app-pokemon-type-button>
+      </li>
+      }
+    </ul>
+  </nav>
+</section>
+<main class="flex flex-col justify-center items-center">
+  <app-pokemon-list [typeSelected]="typeSelected"></app-pokemon-list>
+</main>
