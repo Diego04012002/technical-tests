@@ -30,4 +30,8 @@ export class PokemonRequest {
   getPokemonDetailById(id:string){
     return this.http.get(this.apiUrl + "/pokemon/" + id)
   }
+
+  getPokemonMoves(){
+    return this.http.get(this.apiUrl + "/move?limit=1000")
+  }
 }

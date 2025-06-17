@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import * as d3 from 'd3';
 
 @Component({
@@ -7,17 +15,33 @@ import * as d3 from 'd3';
   templateUrl: './pokemon-stats.html',
   styleUrl: './pokemon-stats.css',
 })
-export class PokemonStats implements AfterViewInit{
+export class PokemonStats implements AfterViewInit, OnInit {
   @Input() stats: { name: string; value: number }[] = [];
-  @Input() id!:string
+  @Input() id!: string;
+  @Input() isCompare:boolean=false
 
   private svg: any;
   private margin = { top: 20, right: 40, bottom: 20, left: 100 };
   private width = 500 - this.margin.left - this.margin.right;
   private height = 300 - this.margin.top - this.margin.bottom;
 
-  constructor(private elRef: ElementRef) {}
-  
+  statMaxValues={
+    hp: 720,
+    attack: 190,
+    defense: 230,
+    'special-attack': 194,
+    'special-defense': 230,
+    speed: 180,
+  };
+
+  constructor() {}
+
+  ngOnInit(): void {
+    if(this.isCompare){
+      this.stats = this.stats.slice(0, 5);
+    }
+  }
+
   ngAfterViewInit(): void {
     this.createSvg();
     this.drawBars();
@@ -25,7 +49,7 @@ export class PokemonStats implements AfterViewInit{
 
   private createSvg(): void {
     this.svg = d3
-      .select("#stats-chart" + this.id)
+      .select('#stats-chart' + this.id)
       .append('svg')
       .attr('width', this.width + this.margin.left + this.margin.right)
       .attr('height', this.height + this.margin.top + this.margin.bottom)
@@ -34,10 +58,15 @@ export class PokemonStats implements AfterViewInit{
   }
 
   private drawBars(): void {
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(this.stats, (d) => d.value)!])
-      .range([0, this.width]);
+    const xScales = new Map<string, d3.ScaleLinear<number, number>>();
+
+    //creo cada barra con su maximo correspondiente a cada stat
+    Object.entries(this.statMaxValues).forEach(([statName, maxValue]) => {
+      xScales.set(
+        statName,
+        d3.scaleLinear().domain([0, maxValue]).range([0, this.width])
+      );
+    });
 
     const y = d3
       .scaleBand()
@@ -57,40 +86,31 @@ export class PokemonStats implements AfterViewInit{
       .data(this.stats)
       .enter()
       .append('rect')
-      .attr('y', (d: any) => y(d.name)!)
+      .attr('y', (d: { name: string; value: number }) => y(d.name)!)
       .attr('width', 0)
       .attr('height', y.bandwidth())
-      .attr('fill', (d:any) => colorScale(d.value))
+      .attr('fill', (d: { name: string; value: number }) => colorScale(d.value))
       .transition()
       .duration(800)
-      .attr('width', (d: any) => x(d.value));
+      .attr('width', (d: { name: string; value: number }) => {
+        const scale = xScales.get(d.name.toLowerCase());
+        return scale ? scale(d.value) : 0;
+      });
 
     this.svg
       .selectAll('labels')
       .data(this.stats)
       .enter()
       .append('text')
-      .attr('x', (d: any) => x(d.value) + 5)
-      .attr('y', (d: any) => y(d.name)! + y.bandwidth() / 2 + 5)
-      .text((d: any) => d.value)
-      .style('font-size', '14px');
-  }
-
-  private getColor(statValue: number): string {
-    if (statValue <= 0 && statValue <= 25) {
-      return 'yellow';
-    }
-    if (statValue > 25 && statValue <= 50) {
-      return 'green';
-    }
-    if (statValue > 50 && statValue <= 75) {
-      return 'orange';
-    }
-    if (statValue < 75) {
-      return 'red';
-    } else {
-      return 'grey';
-    }
+      .attr('x', (d: { name: string; value: number }) => {
+        const scale = xScales.get(d.name.toLowerCase());
+        return scale ? scale(d.value) + 5 : 5;
+      })
+      .attr('y', (d: { name: string; value: number }) => y(d.name)! + y.bandwidth() / 2 + 5)
+      .text((d: { name: string; value: number }) => {
+        return d.value + "/" + this.statMaxValues[d.name.toLowerCase() as keyof typeof this.statMaxValues];
+      })
+      .style('font-size', '20px');
   }
 
   getSumStats(): number {

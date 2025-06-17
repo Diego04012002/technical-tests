@@ -10,6 +10,7 @@ import { PokemonStats } from '../pokemon-stats/pokemon-stats';
 export class PokemonInfo implements OnChanges{
 
   @Input() pokemon:any
+  @Input() isCompare:boolean=false
 
   constructor(){
 

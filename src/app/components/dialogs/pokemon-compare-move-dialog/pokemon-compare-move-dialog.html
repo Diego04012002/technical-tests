@@ -1,0 +1,59 @@
+<section class="py-3 px-5">
+  <div class="flex justify-end items-center p-2">
+    <button
+      class="flex justify-center items-center hover:scale-110 transition-transform duration-500 text-red-600 rounded-4xl border-2 p-1"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <form class="flex justify-center items-center gap-5">
+    <mat-form-field class="example-full-width">
+      <mat-label>Primer Move</mat-label>
+      <input
+        type="text"
+        placeholder="Pick one"
+        aria-label="Number"
+        matInput
+        [formControl]="firstMoveName"
+        [matAutocomplete]="autoFirst"
+      />
+      <mat-autocomplete #autoFirst="matAutocomplete">
+        @for (move of listFristMove | async; track move) {
+        <mat-option [value]="move.name">{{move.name}}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <mat-form-field class="example-full-width">
+      <mat-label>Segundo Move</mat-label>
+      <input
+        type="text"
+        placeholder="Pick one"
+        aria-label="Number"
+        matInput
+        [formControl]="secondMoveName"
+        [matAutocomplete]="autoSecond"
+      />
+      <mat-autocomplete #autoSecond="matAutocomplete">
+        @for (move of listSecondMove | async; track move) {
+        <mat-option [value]="move.name">{{move.name}}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <button
+      (click)="showMoveCompareStats()"
+      [disabled]="!firstMoveName.value || !secondMoveName.value"
+      class="px-4 py-2 border-b-4 border-green-500 text-green-500 enabled:hover:text-white enabled:hover:bg-green-500 transition-all duration-200 disabled:opacity-50"
+    >
+      Comparar moves
+    </button>
+  </form>
+
+  <div class="flex flex-row items-center justify-center">
+    @if(showMoveCompare){
+      <app-pokemon-move [moveFirst]="firstMove" [moveSecond]="secondMove" [id]="1"></app-pokemon-move>
+    }@else {
+      <span class="mt-10">Choose two move to compare</span>
+    }
+  </div>
+</section>

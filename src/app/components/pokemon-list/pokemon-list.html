@@ -1,7 +1,14 @@
 
-<section class="flex flex-col justify-center items-center">
+<main class="flex flex-col justify-center items-center">
+  <div class="flex  gap-5">
+    <button (click)="openDialogToCompareStats()" [disabled]="pokemonsToCompare.length<2" class=" h-14 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-full transition-transform transform-gpu hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:-translate-0">
+      Compare stats
+    </button>
+    <button (click)="openDialogToCompareMove()" class=" h-14 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-full transition-transform transform-gpu hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:-translate-0">
+      Compare moves
+    </button>
+  </div>
   @if(pokemonDetailsList.data.length>=initialBatch){
-    
     <table mat-table class="mat-elevation-z8" [dataSource]="pokemonDetailsList" matSort (matSortChange)="announceSortChange($event)">
     
       <ng-container matColumnDef="ID">
@@ -59,4 +66,4 @@
       <span>No existen pokemons de este {{typeSelected.name}}</span>
     </div>
   }
-</section>
+</main>

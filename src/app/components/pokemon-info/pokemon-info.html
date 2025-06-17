@@ -14,5 +14,5 @@
     <span>{{pokemon?.weight}}M</span>
     <span>{{pokemon?.height}}KG</span>
   </div>
-  <app-pokemon-stats [id]="pokemon.name" [stats]="getStatsObject()"></app-pokemon-stats>
+  <app-pokemon-stats [isCompare]="isCompare" [id]="pokemon.name" [stats]="getStatsObject()"></app-pokemon-stats>
 </div>

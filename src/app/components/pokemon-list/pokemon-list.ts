@@ -27,6 +27,8 @@ import {
 } from '@angular/material/dialog';
 import { PokemonInfoDialog } from '../dialogs/pokemon-info-dialog/pokemon-info-dialog';
 import {MatCheckbox, MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
+import { PokemonCompareStats } from '../dialogs/pokemon-compare-stats/pokemon-compare-stats';
+import { PokemonCompareMoveDialog } from '../dialogs/pokemon-compare-move-dialog/pokemon-compare-move-dialog';
 
 @Component({
   selector: 'app-pokemon-list',
@@ -175,6 +177,31 @@ export class PokemonList implements OnChanges, AfterViewInit {
         this.pokemonsToCompare.splice(index, 1);
       }
     }
+  }
+
+  openDialogToCompareStats(){
+    const dialogRef = this.dialog.open(PokemonCompareStats, {
+      data: this.pokemonsToCompare,
+      minWidth:"600px",
+      maxWidth:"1300px",
+      height:"660px",
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+
+    });
+  }
+
+  openDialogToCompareMove(){
+    const dialogRef = this.dialog.open(PokemonCompareMoveDialog, {
+      minWidth:"600px",
+      maxWidth:"1300px",
+      height:"730px",
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+
+    });
   }
 
   isCheckboxDisabled(element: any): boolean {

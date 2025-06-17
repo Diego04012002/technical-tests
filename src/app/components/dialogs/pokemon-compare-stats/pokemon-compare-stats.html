@@ -1,0 +1,15 @@
+<section>
+  <div class="flex justify-end items-center p-2">
+    <button
+      class="flex justify-center items-center hover:scale-110 transition-transform duration-500 text-red-600 rounded-4xl border-2 p-1"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="flex justify-center gap-5">
+    @for (pokemon of pokemonToCompare; track $index) {
+    <app-pokemon-info [isCompare]="true" [pokemon]="pokemon"></app-pokemon-info>
+    }
+  </div>
+</section>
