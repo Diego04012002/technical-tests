@@ -147,7 +147,7 @@ export class PokemonList implements OnChanges, AfterViewInit {
       data: pokemon,
       minWidth:"600px",
       maxWidth:"1300px",
-      height:"730px",
+      height:"740px",
     });
 
     dialogRef.afterClosed().subscribe((result:{typeOption:Type, pokemon:Pokemon}) => {

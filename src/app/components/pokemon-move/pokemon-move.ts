@@ -26,7 +26,6 @@ interface BarData {
 export class PokemonMove implements OnInit, OnChanges {
   @Input() moveFirst!: {name:string; url:string};
   @Input() moveSecond!: {name:string; url:string};
-  @Input() id!: number;
   loadingChart: boolean = true;
 
   hasMapMoveLearned: {
@@ -95,7 +94,7 @@ export class PokemonMove implements OnInit, OnChanges {
     );
 
     forkJoin<Pokemon[]>(observables).subscribe((results: Pokemon[]) => {
-      results.forEach((data) => {
+      results.forEach((data:Pokemon, index:number) => {
         data.types.forEach((type: { type: Type }) => {
           const typeFind = this.hasMapMoveLearned.find(
             (entry:{
@@ -118,7 +117,7 @@ export class PokemonMove implements OnInit, OnChanges {
         setTimeout(() => {
           this.createSvg();
           this.drawBars();
-        });
+        },100);
       }
     });
   }
@@ -126,7 +125,7 @@ export class PokemonMove implements OnInit, OnChanges {
   private createSvg(): void {
     
     this.svg = d3
-      .select('#stats-chart' + this.id)
+      .select('#stats-chart')
       .append('svg')
       .attr('width', this.width + this.margin.left + this.margin.right)
       .attr('height', this.height + this.margin.top + this.margin.bottom)
@@ -134,73 +133,71 @@ export class PokemonMove implements OnInit, OnChanges {
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
   }
 
- private drawBars(): void {
-  if (!this.hasMapMoveLearned || this.hasMapMoveLearned.length === 0) return;
+  private drawBars(): void {
+    if (!this.hasMapMoveLearned || this.hasMapMoveLearned.length === 0) return;
 
-  const processedData = this.hasMapMoveLearned.map((item) => ({
-    typeName: item.typeName,
-    countPokemonFirst: item.countPokemonFirst.size,
-    countPokemonSecond: item.countPokemonSecond.size,
-  }));
+    const processedData = this.hasMapMoveLearned.map((item) => ({
+      typeName: item.typeName,
+      countPokemonFirst: item.countPokemonFirst.size,
+      countPokemonSecond: item.countPokemonSecond.size,
+    }));
 
-  const subgroups = ['countPokemonFirst', 'countPokemonSecond'];
+    const subgroups = ['countPokemonFirst', 'countPokemonSecond'];
 
-  const groups = processedData.map(d => d.typeName);
+    const groups = processedData.map(d => d.typeName);
 
-  const x = d3.scaleBand()
-    .domain(groups)
-    .range([0, this.width])
-    .padding(0.2);
-  if(this.svg){
-    this.svg.append('g')
-      .attr('transform', `translate(0, ${this.height})`)
-      .call(d3.axisBottom(x).tickSize(0))
-      .selectAll('text')
-      .attr('transform', 'translate(-10,0)rotate(-45)')
-      .style('text-anchor', 'end')
-      .style("font-size", "18px")
+    const x = d3.scaleBand()
+      .domain(groups)
+      .range([0, this.width])
+      .padding(0.2);
+      
+    if(this.svg){
+      this.svg.append('g')
+        .attr('transform', `translate(0, ${this.height})`)
+        .call(d3.axisBottom(x).tickSize(0))
+        .selectAll('text')
+        .attr('transform', 'translate(-10,0)rotate(-45)')
+        .style('text-anchor', 'end')
+        .style("font-size", "18px")
   
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(processedData, d => Math.max(d.countPokemonFirst, d.countPokemonSecond))! * 1.1])
-      .range([this.height, 0]);
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(processedData, d => Math.max(d.countPokemonFirst, d.countPokemonSecond))! * 1.1])
+        .range([this.height, 0]);
   
-    this.svg.append('g')
-      .call(d3.axisLeft(y));
+      this.svg.append('g')
+        .call(d3.axisLeft(y));
   
-    const xSubgroup = d3.scaleBand()
-      .domain(subgroups)
-      .range([0, x.bandwidth()])
-      .padding(0.05);
+      const xSubgroup = d3.scaleBand()
+        .domain(subgroups)
+        .range([0, x.bandwidth()])
+        .padding(0.05);
   
-    // Colores
-    const color = d3.scaleOrdinal()
-      .domain(subgroups)
-      .range(['#69b3a2', '#4C9F70']);
+      const color = d3.scaleOrdinal()
+        .domain(subgroups)
+        .range(['#00fbc0', '#1b34d9']);
   
-    this.svg.append('g')
-      .selectAll('g')
-      .data(processedData)
-      .join('g')
-      .attr('transform', (d: { typeName: string; countPokemonFirst: number; countPokemonSecond: number }) => `translate(${x(d.typeName)},0)`)
-      .selectAll('rect')
-      .data((d: BarData) => subgroups.map(key => ({
-          key: key,
-          value: key === 'countPokemonFirst' ? d.countPokemonFirst : d.countPokemonSecond
-        })))
-      .join('rect')
-      .attr('x', (d: { key: string; value: number }) => xSubgroup(d.key)!)
-      .attr('y', (d: { key: string; value: number }) => y(d.value))
-      .attr('width', xSubgroup.bandwidth())
-      .attr('height', (d: { key: string; value: number }) => this.height - y(d.value))
-      .attr('fill', (d: { key: string; value: number }) => color(d.key) as string);
-
+      this.svg.append('g')
+        .selectAll('g')
+        .data(processedData)
+        .join('g')
+        .attr('transform', (d: { typeName: string; countPokemonFirst: number; countPokemonSecond: number }) => `translate(${x(d.typeName)},0)`)
+        .selectAll('rect')
+        .data((d: BarData) => subgroups.map(key => ({
+            key: key,
+            value: key === 'countPokemonFirst' ? d.countPokemonFirst : d.countPokemonSecond
+          })))
+        .join('rect')
+        .attr('x', (d: { key: string; value: number }) => xSubgroup(d.key)!)
+        .attr('y', (d: { key: string; value: number }) => y(d.value))
+        .attr('width', xSubgroup.bandwidth())
+        .attr('height', (d: { key: string; value: number }) => this.height - y(d.value))
+        .attr('fill', (d: { key: string; value: number }) => color(d.key) as string);
+        
     } 
   }
 
-
-
   clearData() {
-    this.hasMapMoveLearned.map(
+    this.hasMapMoveLearned=this.hasMapMoveLearned.map(
       (data: {
         typeName: string;
         countPokemonFirst: Set<string>;

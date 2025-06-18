@@ -10,7 +10,7 @@
   <div class="flex items-center justify-center">
     <button class="py-2.5 px-6 mb-2 text-sm rounded-full border border-solid border-emerald-200 text-emerald-600 cursor-pointer font-semibold shadow-xs transition-all duration-500 hover:bg-emerald-600 hover:text-white" (click)="showEvolutionDetail()">{{showEvolution ? 'Ocultar Evolución': 'Ver Evolución'}}</button>
   </div>
-  <div class="flex justify-center items-center gap-2">
+  <div class="flex justify-center items-center gap-2 mb-3">
     @for (type of pokemon.types; track $index) {
       <app-pokemon-type-button [typeSelected]="type.type" [isButton]="true" (seletectType)="showListPokemonByType($event)"></app-pokemon-type-button>
     }

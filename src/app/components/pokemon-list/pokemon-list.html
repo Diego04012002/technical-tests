@@ -9,7 +9,7 @@
     </button>
   </div>
   @if(pokemonDetailsList.data.length>=initialBatch){
-    <table mat-table class="mat-elevation-z8" [dataSource]="pokemonDetailsList" matSort (matSortChange)="announceSortChange($event)">
+    <table mat-table class="mat-elevation-z8 mt-5" [dataSource]="pokemonDetailsList" matSort (matSortChange)="announceSortChange($event)">
     
       <ng-container matColumnDef="ID">
         <th mat-header-cell *matHeaderCellDef class="w-50"> No. </th>

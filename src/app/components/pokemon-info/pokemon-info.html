@@ -1,18 +1,19 @@
-<div class="flex flex-col mt-2 rounded-2xl">
-  <div class="flex justify-center items-center">
+<div class="flex flex-col mt-3 rounded-2xl">
+  <div class="flex justify-center items-center ">
+    <img src="assets/img/bg-pattern-card.svg" alt="Background of the card" class="absolute h-30  rounded-b-[150px] top-36 z-0  fit roun">
     <img
-      class="h-48 w-96 object-contain transition-opacity duration-300"
+      class="h-48 w-96 object-contain transition-opacity duration-300 z-10"
       [src]="pokemon.sprites.other.dream_world.front_default"
       [alt]="pokemon.name"
     />
   </div>
-  <div class="flex justify-center items-center gap-2">
+  <div class="flex justify-center  items-center gap-2 z-10">
     <span>{{pokemon.id}}</span>
-    <h4 class="uppercase font-bold text-2xl">{{pokemon.name}}</h4>
+    <h4 class="uppercase  font-bold text-2xl">{{pokemon.name}}</h4>
   </div>
-  <div class="flex justify-center items-center gap-9">
-    <span>{{pokemon.weight}}M</span>
-    <span>{{pokemon.height}}KG</span>
+  <div class="flex justify-center items-center gap-9 z-10">
+    <span >{{pokemon.weight}}M</span>
+    <span >{{pokemon.height}}KG</span>
   </div>
   <app-pokemon-stats [isCompare]="isCompare" [id]="pokemon.name" [stats]="getStatsObject()"></app-pokemon-stats>
 </div>
