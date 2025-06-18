@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* * {
-    box-sizing: border-box;
-    font-family: 'Rubik', sans-serif;
+@theme{
+    --animate-bounce-pulse:bounce-pulse 2s ease-in-out infinite;
 }
-body{
-    background-color: #ececec;
-} */
 
-
-/* html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; } */
+@keyframes bounce-pulse {
+    0%, 100% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0.8,0,1,1);
+    }
+    50% {
+        transform: translateY(-5px);
+        animation-timing-function: cubic-bezier(0,0,0.2,1);
+    }
+}
 
 .mat-mdc-row{
     background: inherit !important;

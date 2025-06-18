@@ -37,53 +37,48 @@ export class PokemonInfoDialog implements OnInit {
   }
 
   showEvolutionDetail() {
-    if(this.pokemonEvo && !this.showEvolution){
+    if (this.pokemonEvo && this.showEvolution) {
       this.loadingEvolution = false;
-      this.showEvolution = true;
+      this.showEvolution = false;
       this.showListByType = false;
-    }else{
-      if (!this.showEvolution) {
-        this.loadingEvolution = true;
-        this.pokemonService
-          .getPokemonSpecie(this.pokemon.species.url)
-          .subscribe((data: any) => {
-            const evolutionData=data as Pokemon
-            const urlEvolutionChain = evolutionData.evolution_chain.url;
-  
-            this.pokemonService
-              .getPokemonDetails(urlEvolutionChain)
-              .subscribe((dataEvo: Evolution) => {
-                const chain = dataEvo.chain;
-  
-                let nextEvolution = this.findNextEvolution(
-                  chain,
-                  this.pokemon.name
-                );
-  
-                if (nextEvolution) {
-                  const evolutionId = this.extractIdFromUrl(
-                    nextEvolution.species.url
-                  );
-                  this.pokemonService
-                    .getPokemonDetailById(evolutionId)
-                    .subscribe((evolutionData: any) => {
-                      setTimeout(() => {
-                        this.pokemonEvo = evolutionData;
-                        this.loadingEvolution = false;
-                        this.showEvolution = true;
-                        this.showListByType = false;
-                      }, 1000);
-                    });
-                } else {
+      this.noHaveEvolution=false
+      return;
+    }
+    if (this.showEvolution) {
+      this.showEvolution = false;
+      return;
+    }
+    if(this.noHaveEvolution){
+      this.noHaveEvolution=false
+      return;
+    }
+    this.loadingEvolution = true;
+
+    this.pokemonService.getPokemonSpecie(this.pokemon.species.url).subscribe({
+      next: (data: any) => {
+        const urlEvolutionChain = data.evolution_chain.url;
+        this.pokemonService.getPokemonDetails(urlEvolutionChain).subscribe({
+          next: (dataEvo: Evolution) => {
+            const chain = dataEvo.chain;
+            const nextEvolution = this.findNextEvolution(chain, this.pokemon.name);
+            if (nextEvolution) {
+              const evolutionId = this.extractIdFromUrl(nextEvolution.species.url);
+              this.pokemonService.getPokemonDetailById(evolutionId).subscribe({
+                next: (evolutionData: any) => {
+                  this.pokemonEvo = evolutionData;
                   this.loadingEvolution = false;
-                  this.noHaveEvolution = true;
+                  this.showEvolution = true;
+                  this.showListByType = false;
                 }
               });
-          });
-      } else {
-        this.showEvolution = !this.showEvolution;
+            } else {
+              this.loadingEvolution = false;
+              this.noHaveEvolution = true;
+            }
+          }
+        });
       }
-    }
+    });
   }
 
   findNextEvolution(chain: EvolutionChain, currentPokemonName: string): any | null {

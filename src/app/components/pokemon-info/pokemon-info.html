@@ -1,11 +1,20 @@
 <div class="flex flex-col mt-3 rounded-2xl">
   <div class="flex justify-center items-center ">
-    <img src="assets/img/bg-pattern-card.svg" alt="Background of the card" class="absolute h-30  rounded-b-[150px] top-36 z-0  fit roun">
-    <img
-      class="h-48 w-96 object-contain transition-opacity duration-300 z-10"
-      [src]="pokemon.sprites.other.dream_world.front_default"
-      [alt]="pokemon.name"
-    />
+    @if(pokemon.sprites.other.dream_world.front_default){
+        <img  src="assets/img/bg-pattern-card.svg" alt="Background of the card" class="absolute h-30  rounded-b-[150px] top-36 z-0  fit roun">
+        <img
+          class="h-48 w-96 object-contain transition-opacity duration-300 z-10"
+          [src]="pokemon.sprites.other.dream_world.front_default"
+          [alt]="pokemon.name"
+          (load)="loadingSprite = true"
+          [class.opacity-0]="!loadingSprite"
+          [class.opacity-100]="loadingSprite"
+        />
+    }@else {
+      <div class="z-10 h-48 w-96 flex justify-center items-center">
+        <span class="loader"></span>
+      </div>
+    }
   </div>
   <div class="flex justify-center  items-center gap-2 z-10">
     <span>{{pokemon.id}}</span>

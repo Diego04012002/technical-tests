@@ -11,6 +11,7 @@ export class PokemonInfo{
 
   @Input() pokemon!:Pokemon
   @Input() isCompare:boolean=false
+  loadingSprite:boolean=false
 
   constructor(){
 

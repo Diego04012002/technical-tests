@@ -1,10 +1,12 @@
 import {
   AfterViewInit,
   Component,
+  EventEmitter,
   HostListener,
   inject,
   Input,
   OnChanges,
+  Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -15,18 +17,12 @@ import { PokemonTypeButton } from '../pokemon-type-button/pokemon-type-button';
 import { CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
-import { debounceTime, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import {
-  MAT_DIALOG_DATA,
   MatDialog,
-  MatDialogActions,
-  MatDialogClose,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
 } from '@angular/material/dialog';
 import { PokemonInfoDialog } from '../dialogs/pokemon-info-dialog/pokemon-info-dialog';
-import {MatCheckbox, MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import { PokemonCompareStats } from '../dialogs/pokemon-compare-stats/pokemon-compare-stats';
 import { PokemonCompareMoveDialog } from '../dialogs/pokemon-compare-move-dialog/pokemon-compare-move-dialog';
 
@@ -48,6 +44,7 @@ export class PokemonList implements OnChanges, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   @Input() typeSelected!: Type;
+  @Output() selectedType = new EventEmitter<Type>();
 
   pokemonService = inject(PokemonRequest);
   readonly dialog = inject(MatDialog);
@@ -152,6 +149,7 @@ export class PokemonList implements OnChanges, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result:{typeOption:Type, pokemon:Pokemon}) => {
       if(result){
+        this.selectedType.emit(result.typeOption)
         this.getPokemonsByTpe(result.typeOption.url, true, result.pokemon)
       }
     });
