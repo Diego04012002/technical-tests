@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class PokemonCompareStats implements OnInit{
 
   readonly dialogRef = inject(MatDialogRef<PokemonCompareStats>);
-  readonly pokemonToCompare = inject<any>(MAT_DIALOG_DATA);
+  readonly pokemonToCompare = inject<Pokemon[]>(MAT_DIALOG_DATA);
   pokemonService = inject(PokemonRequest);
 
   constructor(){

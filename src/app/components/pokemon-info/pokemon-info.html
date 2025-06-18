@@ -2,17 +2,17 @@
   <div class="flex justify-center items-center">
     <img
       class="h-48 w-96 object-contain transition-opacity duration-300"
-      [src]="pokemon?.sprites?.other?.dream_world?.front_default"
-      [alt]="pokemon?.name"
+      [src]="pokemon.sprites.other.dream_world.front_default"
+      [alt]="pokemon.name"
     />
   </div>
   <div class="flex justify-center items-center gap-2">
-    <span>{{pokemon?.id}}</span>
-    <h4 class="uppercase font-bold text-2xl">{{pokemon?.name}}</h4>
+    <span>{{pokemon.id}}</span>
+    <h4 class="uppercase font-bold text-2xl">{{pokemon.name}}</h4>
   </div>
   <div class="flex justify-center items-center gap-9">
-    <span>{{pokemon?.weight}}M</span>
-    <span>{{pokemon?.height}}KG</span>
+    <span>{{pokemon.weight}}M</span>
+    <span>{{pokemon.height}}KG</span>
   </div>
   <app-pokemon-stats [isCompare]="isCompare" [id]="pokemon.name" [stats]="getStatsObject()"></app-pokemon-stats>
 </div>

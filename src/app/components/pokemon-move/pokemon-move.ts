@@ -7,7 +7,6 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { PokemonRequest } from '../../services/pokemon-request';
-import { PokemonMoveChart } from '../pokemon-move-chart/pokemon-move-chart';
 import * as d3 from 'd3';
 import { forkJoin } from 'rxjs';
 
@@ -35,13 +34,13 @@ export class PokemonMove implements OnInit, OnChanges {
     countPokemonFirst: Set<string>;
     countPokemonSecond: Set<string>;
   }[] = [];
-  private svg: any;
+  private svg: d3.Selection<SVGGElement, unknown, HTMLElement, any> | null = null;
   private margin = { top: 22, right: 50, bottom: 70, left: 80 };
   private width = 1000;
   private height = 450;
 
-  firstMoveLearndedPokemonList: any;
-  secondMoveLearndedPokemonList: any;
+  firstMoveLearndedPokemonList: PokemonDefault[]=[];
+  secondMoveLearndedPokemonList: PokemonDefault[]=[];
 
   pokemonService = inject(PokemonRequest);
 
@@ -68,7 +67,7 @@ export class PokemonMove implements OnInit, OnChanges {
     this.pokemonService
       .getPokemonTypes()
       .subscribe((data: { results: Type[] }) => {
-        data.results.forEach((type: any) => {
+        data.results.forEach((type: Type) => {
           let typeObject = {
             typeName: type.name,
             countPokemonFirst: new Set<string>(),
@@ -84,22 +83,26 @@ export class PokemonMove implements OnInit, OnChanges {
   getPokemonDetails(move: string, isFirst: boolean) {
     this.pokemonService
       .getPokemonDetails(move)
-      .subscribe((data: { learned_by_pokemon: any }) => {
+      .subscribe((data: { learned_by_pokemon: PokemonDefault[] }) => {
         this.firstMoveLearndedPokemonList = data.learned_by_pokemon;
         this.createObjectToBuild(isFirst);
       });
   }
 
   createObjectToBuild(isFirst: boolean) {
-    const observables = this.firstMoveLearndedPokemonList.map((pokemon: any) =>
+    const observables = this.firstMoveLearndedPokemonList.map((pokemon: PokemonDefault) =>
       this.pokemonService.getPokemonDetails(pokemon.url)
     );
 
-    forkJoin<any[]>(observables).subscribe((results: any[]) => {
+    forkJoin<Pokemon[]>(observables).subscribe((results: Pokemon[]) => {
       results.forEach((data) => {
         data.types.forEach((type: { type: Type }) => {
           const typeFind = this.hasMapMoveLearned.find(
-            (entry) => entry.typeName === type.type.name
+            (entry:{
+                typeName: string;
+                countPokemonFirst: Set<string>;
+                countPokemonSecond: Set<string>;
+              }) => entry.typeName === type.type.name
           );
           if (typeFind) {
             if (isFirst) {
@@ -148,48 +151,50 @@ export class PokemonMove implements OnInit, OnChanges {
     .domain(groups)
     .range([0, this.width])
     .padding(0.2);
+  if(this.svg){
+    this.svg.append('g')
+      .attr('transform', `translate(0, ${this.height})`)
+      .call(d3.axisBottom(x).tickSize(0))
+      .selectAll('text')
+      .attr('transform', 'translate(-10,0)rotate(-45)')
+      .style('text-anchor', 'end')
+      .style("font-size", "18px")
+  
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(processedData, d => Math.max(d.countPokemonFirst, d.countPokemonSecond))! * 1.1])
+      .range([this.height, 0]);
+  
+    this.svg.append('g')
+      .call(d3.axisLeft(y));
+  
+    const xSubgroup = d3.scaleBand()
+      .domain(subgroups)
+      .range([0, x.bandwidth()])
+      .padding(0.05);
+  
+    // Colores
+    const color = d3.scaleOrdinal()
+      .domain(subgroups)
+      .range(['#69b3a2', '#4C9F70']);
+  
+    this.svg.append('g')
+      .selectAll('g')
+      .data(processedData)
+      .join('g')
+      .attr('transform', (d: { typeName: string; countPokemonFirst: number; countPokemonSecond: number }) => `translate(${x(d.typeName)},0)`)
+      .selectAll('rect')
+      .data((d: BarData) => subgroups.map(key => ({
+          key: key,
+          value: key === 'countPokemonFirst' ? d.countPokemonFirst : d.countPokemonSecond
+        })))
+      .join('rect')
+      .attr('x', (d: { key: string; value: number }) => xSubgroup(d.key)!)
+      .attr('y', (d: { key: string; value: number }) => y(d.value))
+      .attr('width', xSubgroup.bandwidth())
+      .attr('height', (d: { key: string; value: number }) => this.height - y(d.value))
+      .attr('fill', (d: { key: string; value: number }) => color(d.key) as string);
 
-  this.svg.append('g')
-    .attr('transform', `translate(0, ${this.height})`)
-    .call(d3.axisBottom(x).tickSize(0))
-    .selectAll('text')
-    .attr('transform', 'translate(-10,0)rotate(-45)')
-    .style('text-anchor', 'end')
-    .style("font-size", "18px")
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(processedData, d => Math.max(d.countPokemonFirst, d.countPokemonSecond))! * 1.1])
-    .range([this.height, 0]);
-
-  this.svg.append('g')
-    .call(d3.axisLeft(y));
-
-  const xSubgroup = d3.scaleBand()
-    .domain(subgroups)
-    .range([0, x.bandwidth()])
-    .padding(0.05);
-
-  // Colores
-  const color = d3.scaleOrdinal()
-    .domain(subgroups)
-    .range(['#69b3a2', '#4C9F70']);
-
-  this.svg.append('g')
-    .selectAll('g')
-    .data(processedData)
-    .join('g')
-    .attr('transform', (d: { typeName: string; countPokemonFirst: number; countPokemonSecond: number }) => `translate(${x(d.typeName)},0)`)
-    .selectAll('rect')
-    .data((d: BarData) => subgroups.map(key => ({
-        key: key,
-        value: key === 'countPokemonFirst' ? d.countPokemonFirst : d.countPokemonSecond
-      })))
-    .join('rect')
-    .attr('x', (d: { key: string; value: number }) => xSubgroup(d.key)!)
-    .attr('y', (d: { key: string; value: number }) => y(d.value))
-    .attr('width', xSubgroup.bandwidth())
-    .attr('height', (d: { key: string; value: number }) => this.height - y(d.value))
-    .attr('fill', (d: { key: string; value: number }) => color(d.key) as string);
+    } 
   }
 
 

@@ -17,7 +17,7 @@ export class PokemonTypeButton implements OnInit {
 
   ngOnInit(): void {}
 
-  selectType(type: any) {
+  selectType(type: Type) {
     if (this.isButton) {
       this.seletectType.emit(type);
     }

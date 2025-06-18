@@ -20,7 +20,7 @@ export class PokemonStats implements AfterViewInit, OnInit {
   @Input() id!: string;
   @Input() isCompare:boolean=false
 
-  private svg: any;
+  private svg: d3.Selection<SVGGElement, unknown, HTMLElement, any> | null = null;;
   private margin = { top: 20, right: 40, bottom: 20, left: 100 };
   private width = 500 - this.margin.left - this.margin.right;
   private height = 300 - this.margin.top - this.margin.bottom;
@@ -79,38 +79,41 @@ export class PokemonStats implements AfterViewInit, OnInit {
       .domain([0, 200])
       .range(['#22c55e', '#ef4444']);
 
-    this.svg.append('g').call(d3.axisLeft(y));
+    if(this.svg){
+      this.svg.append('g').call(d3.axisLeft(y));
+  
+      this.svg
+        .selectAll('bars')
+        .data(this.stats)
+        .enter()
+        .append('rect')
+        .attr('y', (d: { name: string; value: number }) => y(d.name)!)
+        .attr('width', 0)
+        .attr('height', y.bandwidth())
+        .attr('fill', (d: { name: string; value: number }) => colorScale(d.value))
+        .transition()
+        .duration(800)
+        .attr('width', (d: { name: string; value: number }) => {
+          const scale = xScales.get(d.name.toLowerCase());
+          return scale ? scale(d.value) : 0;
+        });
+  
+      this.svg
+        .selectAll('labels')
+        .data(this.stats)
+        .enter()
+        .append('text')
+        .attr('x', (d: { name: string; value: number }) => {
+          const scale = xScales.get(d.name.toLowerCase());
+          return scale ? scale(d.value) + 5 : 5;
+        })
+        .attr('y', (d: { name: string; value: number }) => y(d.name)! + y.bandwidth() / 2 + 5)
+        .text((d: { name: string; value: number }) => {
+          return d.value + "/" + this.statMaxValues[d.name.toLowerCase() as keyof typeof this.statMaxValues];
+        })
+        .style('font-size', '20px');
+    }
 
-    this.svg
-      .selectAll('bars')
-      .data(this.stats)
-      .enter()
-      .append('rect')
-      .attr('y', (d: { name: string; value: number }) => y(d.name)!)
-      .attr('width', 0)
-      .attr('height', y.bandwidth())
-      .attr('fill', (d: { name: string; value: number }) => colorScale(d.value))
-      .transition()
-      .duration(800)
-      .attr('width', (d: { name: string; value: number }) => {
-        const scale = xScales.get(d.name.toLowerCase());
-        return scale ? scale(d.value) : 0;
-      });
-
-    this.svg
-      .selectAll('labels')
-      .data(this.stats)
-      .enter()
-      .append('text')
-      .attr('x', (d: { name: string; value: number }) => {
-        const scale = xScales.get(d.name.toLowerCase());
-        return scale ? scale(d.value) + 5 : 5;
-      })
-      .attr('y', (d: { name: string; value: number }) => y(d.name)! + y.bandwidth() / 2 + 5)
-      .text((d: { name: string; value: number }) => {
-        return d.value + "/" + this.statMaxValues[d.name.toLowerCase() as keyof typeof this.statMaxValues];
-      })
-      .style('font-size', '20px');
   }
 
   getSumStats(): number {

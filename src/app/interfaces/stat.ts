@@ -1,0 +1,3 @@
+interface Stat{
+  name:string
+}

@@ -17,7 +17,7 @@ import { PokemonList } from '../../pokemon-list/pokemon-list';
 })
 export class PokemonInfoDialog implements OnInit {
   readonly dialogRef = inject(MatDialogRef<PokemonInfoDialog>);
-  readonly data = inject<any>(MAT_DIALOG_DATA);
+  readonly data = inject<Pokemon>(MAT_DIALOG_DATA);
   pokemonService = inject(PokemonRequest);
   pokemon = this.data;
   pokemonEvo: any;
@@ -47,11 +47,12 @@ export class PokemonInfoDialog implements OnInit {
         this.pokemonService
           .getPokemonSpecie(this.pokemon.species.url)
           .subscribe((data: any) => {
-            const urlEvolutionChain = data.evolution_chain.url;
+            const evolutionData=data as Pokemon
+            const urlEvolutionChain = evolutionData.evolution_chain.url;
   
             this.pokemonService
               .getPokemonDetails(urlEvolutionChain)
-              .subscribe((dataEvo: any) => {
+              .subscribe((dataEvo: Evolution) => {
                 const chain = dataEvo.chain;
   
                 let nextEvolution = this.findNextEvolution(
@@ -85,7 +86,7 @@ export class PokemonInfoDialog implements OnInit {
     }
   }
 
-  findNextEvolution(chain: any, currentPokemonName: string): any | null {
+  findNextEvolution(chain: EvolutionChain, currentPokemonName: string): any | null {
     if (
       chain.species.name === currentPokemonName &&
       chain.evolves_to.length > 0
@@ -106,8 +107,8 @@ export class PokemonInfoDialog implements OnInit {
   }
 
   extractIdFromUrl(url: string): string {
-    const parts = url.split('/');
-    return parts[parts.length - 2]; // El penúltimo elemento es el ID
+    const urlSplit = url.split('/');
+    return urlSplit[6];
   }
 
   showListPokemonByType(type: Type) {

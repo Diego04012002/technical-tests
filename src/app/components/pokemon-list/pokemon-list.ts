@@ -52,11 +52,11 @@ export class PokemonList implements OnChanges, AfterViewInit {
   pokemonService = inject(PokemonRequest);
   readonly dialog = inject(MatDialog);
 
-  pokemonListAll: any[] = [];
-  pokemonListScroll: PokemonDefault[] = [];
+  pokemonListAll: PokemonSlot[] = [];
+  pokemonListScroll: PokemonSlot[] = [];
   pokemonDetailsList = new MatTableDataSource();
-  pokemonsToCompare:any[]=[]
-  preferPokemon:any
+  pokemonsToCompare:Pokemon[]=[]
+  preferPokemon!:Pokemon
   displayColumns: string[] = ['ID', 'Name', 'Type', 'Height', 'Action'];
   eventSort!: Sort;
 
@@ -81,10 +81,12 @@ export class PokemonList implements OnChanges, AfterViewInit {
   }
 
   
-  getPokemonsByTpe(urlType: string, reset: boolean, preferPokemon?: any) {
-    this.preferPokemon=preferPokemon
+  getPokemonsByTpe(urlType: string, reset: boolean, preferPokemon?: Pokemon) {
+    if(preferPokemon){
+      this.preferPokemon=preferPokemon
+    }
     this.pokemonsToCompare=[]
-    this.pokemonService.getPokemonsByType(urlType).subscribe((data: any) => {
+    this.pokemonService.getPokemonsByType(urlType).subscribe((data: {pokemon:PokemonSlot[]}) => {
       if (reset) {
         this.noMorePokemon = false;
         this.hasNoPokemon = false;
@@ -95,10 +97,10 @@ export class PokemonList implements OnChanges, AfterViewInit {
       this.pokemonListAll = data.pokemon;
       this.hasNoPokemon = data.pokemon.length == 0;
       this.limit = this.pokemonListAll.length;
-      if (this.preferPokemon) {
-        const index=this.pokemonListAll.findIndex(pokemon=>pokemon.pokemon.name==preferPokemon.name)
+      if (preferPokemon) {
+        const index=this.pokemonListAll.findIndex((pokemon:PokemonSlot)=>pokemon.pokemon.name==preferPokemon.name)
         const object=this.pokemonListAll.find(pokemon=>pokemon.pokemon.name==preferPokemon.name)
-        if (index !== -1) {
+        if (index !== -1 && object) {
           this.pokemonListAll.splice(index, 1);
           this.pokemonListAll.unshift(object);
         }
@@ -128,11 +130,11 @@ export class PokemonList implements OnChanges, AfterViewInit {
     );
     this.pokemonListScroll = [...this.pokemonListScroll, ...nextPokemons];
     this.offset += nextPokemons.length;
-    const detailObservables = nextPokemons.map((pokemon: any) =>
+    const detailObservables = nextPokemons.map((pokemon: PokemonSlot) =>
       this.pokemonService.getPokemonDetails(pokemon.pokemon.url)
     );
 
-    forkJoin(detailObservables).subscribe((data) => {
+    forkJoin(detailObservables).subscribe((data:Pokemon[]) => {
       this.pokemonDetailsList.data = [...this.pokemonDetailsList.data, ...data];
       if (this.eventSort) {
         this.sortTable(this.eventSort);
@@ -140,20 +142,7 @@ export class PokemonList implements OnChanges, AfterViewInit {
     });
   }
 
-  getPokemonDetails(pokemon: any) {
-    this.pokemonService
-      .getPokemonDetails(pokemon.pokemon.url)
-      .subscribe((data) => {
-        setTimeout(() => {
-          this.pokemonDetailsList.data = [
-            ...this.pokemonDetailsList.data,
-            data,
-          ];
-        }, 1000);
-      });
-  }
-
-  openInfoPokemonModal(pokemon: any) {
+  openInfoPokemonModal(pokemon: Pokemon) {
     const dialogRef = this.dialog.open(PokemonInfoDialog, {
       data: pokemon,
       minWidth:"600px",
@@ -161,18 +150,18 @@ export class PokemonList implements OnChanges, AfterViewInit {
       height:"730px",
     });
 
-    dialogRef.afterClosed().subscribe((result:{typeOption:Type, pokemon:any}) => {
+    dialogRef.afterClosed().subscribe((result:{typeOption:Type, pokemon:Pokemon}) => {
       if(result){
         this.getPokemonsByTpe(result.typeOption.url, true, result.pokemon)
       }
     });
   }
 
-  selectedPokemonToCompare(event:MatCheckboxChange,element:any){
+  selectedPokemonToCompare(event:MatCheckboxChange,element:Pokemon){
     if(event.checked){
       this.pokemonsToCompare.push(element)
     }else{
-      const index = this.pokemonsToCompare.findIndex(pokemon => pokemon.name === element.name);
+      const index = this.pokemonsToCompare.findIndex((pokemon:Pokemon) => pokemon.name === element.name);
       if (index !== -1) {
         this.pokemonsToCompare.splice(index, 1);
       }
@@ -196,7 +185,7 @@ export class PokemonList implements OnChanges, AfterViewInit {
     const dialogRef = this.dialog.open(PokemonCompareMoveDialog, {
       minWidth:"600px",
       maxWidth:"1300px",
-      height:"730px",
+      height:"740px",
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -204,11 +193,11 @@ export class PokemonList implements OnChanges, AfterViewInit {
     });
   }
 
-  isCheckboxDisabled(element: any): boolean {
+  isCheckboxDisabled(element: Pokemon): boolean {
     if (this.pokemonsToCompare.length < 2) {
       return false;
     }
-    return !this.pokemonsToCompare.some(pokemon => pokemon.name === element.name);
+    return !this.pokemonsToCompare.some((pokemon:Pokemon) => pokemon.name === element.name);
   }
 
   @HostListener('window:scroll', [])
@@ -232,10 +221,10 @@ export class PokemonList implements OnChanges, AfterViewInit {
   }
 
   sortTable(event: Sort) {
-    this.pokemonDetailsList.data = [...this.pokemonDetailsList.data].sort(
-      (a: any, b: any) => {
-        let valorA = a[event.active];
-        let valorB = b[event.active];
+    this.pokemonDetailsList.data = ([...this.pokemonDetailsList.data] as Pokemon[]).sort(
+      (a: Pokemon, b: Pokemon) => {
+        let valorA = (a as any)[event.active];
+        let valorB = (b as any)[event.active];
 
         if (event.active === 'Height') {
           valorA = Number(a.height);

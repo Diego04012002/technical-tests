@@ -7,23 +7,17 @@ import { PokemonStats } from '../pokemon-stats/pokemon-stats';
   templateUrl: './pokemon-info.html',
   styleUrl: './pokemon-info.css'
 })
-export class PokemonInfo implements OnChanges{
+export class PokemonInfo{
 
-  @Input() pokemon:any
+  @Input() pokemon!:Pokemon
   @Input() isCompare:boolean=false
 
   constructor(){
 
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // if(changes['pokemon'] && changes['pokemon'].currentValue){
-    //   this.pokemon=this.pokemon
-    // }
-  }
-
   getStatsObject(){
-    let stats=this.pokemon.stats.map((data:any)=>{
+    let stats=this.pokemon.stats.map((data:StatsSlot)=>{
       return {
         name: data.stat.name.toUpperCase(),
         value:data.base_stat

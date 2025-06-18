@@ -1,0 +1,3 @@
+interface Evolution{
+  chain:EvolutionChain
+}

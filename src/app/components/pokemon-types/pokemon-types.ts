@@ -25,7 +25,7 @@ export class PokemonTypes {
 
   fetchTypes(): void {
     this.loading = true;
-    this.pokemonService.getPokemonTypes().subscribe((data: any) => {
+    this.pokemonService.getPokemonTypes().subscribe((data: {results:Type[]}) => {
       this.pokemonTypes = data.results;
       this.loading = false;
       this.selectType(this.pokemonTypes[0])

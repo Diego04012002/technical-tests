@@ -28,12 +28,12 @@ import { MatIconModule } from '@angular/material/icon';
 export class PokemonCompareMoveDialog implements OnInit {
   readonly dialogRef = inject(MatDialogRef<PokemonCompareMoveDialog>);
   pokemonService = inject(PokemonRequest);
-  listFristMove!: Observable<any[]>;
-  listSecondMove!: Observable<any[]>;
-  listFristMoveOptions!: any[];
-  listSecondMoveOptions!: any[];
-  firstMove!:{name:string; url:string}
-  secondMove!:{name:string; url:string}
+  listFristMove!: Observable<Move[]>;
+  listSecondMove!: Observable<Move[]>;
+  listFristMoveOptions!: Move[];
+  listSecondMoveOptions!: Move[];
+  firstMove!:Move
+  secondMove!:Move
   firstMoveName = new FormControl('');
   secondMoveName = new FormControl('');
   showMoveCompare:boolean=false
@@ -46,56 +46,49 @@ export class PokemonCompareMoveDialog implements OnInit {
 
   fetchMoves() {
     this.pokemonService.getPokemonMoves().subscribe((data: any) => {
-      this.listFristMoveOptions = data.results;
-      this.listSecondMoveOptions = data.results;
+      this.listFristMoveOptions = data.results as Move[];
+      this.listSecondMoveOptions = data.results as Move[];
 
       this.firstMoveName.valueChanges.pipe(startWith('')).subscribe(() => {
         this.listSecondMove = this.secondMoveName.valueChanges.pipe(
           startWith(''),
-          map((move) => this.filterSecondMove(move || ''))
+          map((move:string | null) => this.filterMoves(move || '', this.listFristMoveOptions, this.firstMoveName))
         );
       });
 
       this.secondMoveName.valueChanges.pipe(startWith('')).subscribe(() => {
         this.listFristMove = this.firstMoveName.valueChanges.pipe(
           startWith(''),
-          map((move) => this.filterFirtsMove(move || ''))
+          map((move:string | null) => this.filterMoves(move || '', this.listSecondMoveOptions, this.secondMoveName))
         );
       });
 
       this.listFristMove = this.firstMoveName.valueChanges.pipe(
         startWith(''),
-        map((move) => this.filterFirtsMove(move || ''))
+        map((move:string | null) => this.filterMoves(move || '', this.listFristMoveOptions, this.firstMoveName))
       );
       this.listSecondMove = this.secondMoveName.valueChanges.pipe(
         startWith(''),
-        map((move) => this.filterSecondMove(move || ''))
+        map((move:string | null) => this.filterMoves(move || '', this.listSecondMoveOptions, this.secondMoveName))
       );
     });
   }
 
-  private filterFirtsMove(value: string): any[] {
-    const filterValue = value.toLowerCase();
-    const selectedSecond = this.secondMoveName.value;
-    return this.listFristMoveOptions
-      .filter((move) => move.name !== selectedSecond)
-      .filter((move) => move.name.toLowerCase().includes(filterValue));
-  }
 
-  private filterSecondMove(value: string): any[] {
+  filterMoves(value:string, listToFilter:Move[], moveToQuit:FormControl):Move[]{
     const filterValue = value.toLowerCase();
-    const selectedFirst = this.firstMoveName.value;
-    return this.listSecondMoveOptions
-      .filter((move) => move.name !== selectedFirst)
-      .filter((move) => move.name.toLowerCase().includes(filterValue));
+    const selectedSecond = moveToQuit.value;
+    return listToFilter
+      .filter((move:Move) => move.name !== selectedSecond)
+      .filter((move:Move) => move.name.toLowerCase().includes(filterValue));
   }
 
   showMoveCompareStats(){
     if(!this.showMoveCompare){
       this.showMoveCompare=true
     }
-    this.firstMove= this.listFristMoveOptions.find(move=>move.name==this.firstMoveName.value)
-    this.secondMove= this.listSecondMoveOptions.find(move=>move.name==this.secondMoveName.value)
+    this.firstMove = this.listFristMoveOptions.find((move:Move) => move.name == this.firstMoveName.value)!;
+    this.secondMove= this.listSecondMoveOptions.find((move:Move)=>move.name==this.secondMoveName.value)!
   }
 
   close(){
